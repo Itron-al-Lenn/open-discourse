@@ -32,10 +32,11 @@ zip_links = [
 for link in zip_links:
     # Extract election period from URL
     electoral_term_str = "electoral_term_" + regex.search(
-            r"(?<=pp)\d+(?=-data\.zip)", link
-        ).group(0)
+        r"(?<=pp)\d+(?=-data\.zip)", link
+    ).group(0)
     print(f"Download & unzip '{electoral_term_str}'...", end="", flush=True)
     r = requests.get(link)
+    r.raise_for_status
     with zipfile.ZipFile(io.BytesIO(r.content)) as z:
         save_path = RAW_XML / electoral_term_str
         save_path.mkdir(parents=True, exist_ok=True)

@@ -109,9 +109,11 @@ def get_first_last(name):
         last_name = "ERROR"
     return " ".join(first_name), last_name
 
+
 def find_with_default(node, key, default):
     result = node.find(key)
     return default if result is None else result.text
+
 
 def get_faction_abbrev(faction, faction_patterns):
     """matches the given faction and returns an id"""
@@ -145,7 +147,9 @@ politicians = pd.read_csv(politicians / "politicians.csv")
 politicians["last_name"] = politicians["last_name"].str.lower()
 politicians["last_name"] = politicians["last_name"].str.replace("ß", "ss", regex=False)
 politicians["first_name"] = politicians["first_name"].str.lower()
-politicians["first_name"] = politicians["first_name"].str.replace("ß", "ss", regex=False)
+politicians["first_name"] = politicians["first_name"].str.replace(
+    "ß", "ss", regex=False
+)
 politicians["first_name"] = politicians["first_name"].apply(str.split)
 
 for folder_path in sorted(ELECTORAL_TERM_19_20_INPUT.iterdir()):
@@ -157,8 +161,13 @@ for folder_path in sorted(ELECTORAL_TERM_19_20_INPUT.iterdir()):
         continue
     term_number = int(term_number.group(0))
 
+    if term_number != 21:
+        continue
+
     contributions_extended_output = CONTRIBUTIONS_EXTENDED / folder_path.stem
-    term_spoken_content = ELECTORAL_TERM_19_20_OUTPUT / folder_path.stem / "speech_content"
+    term_spoken_content = (
+        ELECTORAL_TERM_19_20_OUTPUT / folder_path.stem / "speech_content"
+    )
     contributions_simplified_output = CONTRIBUTIONS_SIMPLIFIED / folder_path.stem
 
     contributions_extended_output.mkdir(parents=True, exist_ok=True)
@@ -237,7 +246,9 @@ for folder_path in sorted(ELECTORAL_TERM_19_20_INPUT.iterdir()):
                     # in factions df share same faction_id, so always the first
                     # one is chosen right now.
                     faction_id = int(
-                        factions.loc[factions["abbreviation"] == faction_abbrev, "id"].iloc[0]
+                        factions.loc[
+                            factions["abbreviation"] == faction_abbrev, "id"
+                        ].iloc[0]
                     )
 
                 speech_text = ""
@@ -307,7 +318,10 @@ for folder_path in sorted(ELECTORAL_TERM_19_20_INPUT.iterdir()):
                         speech_text = ""
                         text_position = 0
                         speaker = content.find("redner")
-                        speaker_id = int(speaker.get("id"))
+                        try:
+                            speaker_id = int(speaker.get("id"))
+                        except ValueError:
+                            continue
                         possible_matches = politicians_electoral_term.loc[
                             politicians_electoral_term["ui"] == speaker_id
                         ]
@@ -343,7 +357,9 @@ for folder_path in sorted(ELECTORAL_TERM_19_20_INPUT.iterdir()):
                             # in factions df share same faction_id, so always the first
                             # one is chosen right now.
                             faction_id = int(
-                                factions.loc[factions["abbreviation"] == faction_abbrev, "id"].iloc[0]
+                                factions.loc[
+                                    factions["abbreviation"] == faction_abbrev, "id"
+                                ].iloc[0]
                             )
                     elif tag == "p":
                         try:

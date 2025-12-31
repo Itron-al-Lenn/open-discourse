@@ -10,7 +10,13 @@ POLITICIANS_STAGE_01.mkdir(parents=True, exist_ok=True)
 
 URL = "https://de.wikipedia.org/wiki/Liste_der_deutschen_Regierungsmitglieder_seit_1949"
 
-page = requests.get(URL)
+page = requests.get(
+    URL,
+    headers={
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    },
+)
+page.raise_for_status()
 soup = BeautifulSoup(page.text, "html.parser")
 main_section = soup.find("div", {"id": "mw-content-text"}).find("div")
 

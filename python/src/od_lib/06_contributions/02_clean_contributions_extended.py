@@ -111,15 +111,17 @@ for folder_path in sorted(CONTRIBUTIONS_EXTENDED_INPUT.iterdir()):
         # names.
         # Question: Is any other character deleted, which could be in a name?
         # Answer: I don't think so.
-        contributions_extended["name_raw"] = contributions_extended["name_raw"].astype(str)
-        contributions_extended["name_raw"] = contributions_extended["name_raw"].str.replace(
-            r"[^a-zA-ZÖÄÜäöüß\-]", " ", regex=True
+        contributions_extended["name_raw"] = contributions_extended["name_raw"].astype(
+            str
         )
+        contributions_extended["name_raw"] = contributions_extended[
+            "name_raw"
+        ].str.replace(r"[^a-zA-ZÖÄÜäöüß\-]", " ", regex=True)
 
         # Replace more than two whitespaces with one.
-        contributions_extended["name_raw"] = contributions_extended["name_raw"].str.replace(
-            r"  +", " ", regex=True
-        )
+        contributions_extended["name_raw"] = contributions_extended[
+            "name_raw"
+        ].str.replace(r"  +", " ", regex=True)
 
         # Graf has to be checked again, as this is also a last_name.
         # Titles have to be added: Like e.c. or when mistakes occur like b.c.
@@ -159,15 +161,16 @@ for folder_path in sorted(CONTRIBUTIONS_EXTENDED_INPUT.iterdir()):
         # Get the first and last name based on the amount of elements.
         for index, first_last in enumerate(first_last_titles):
             if len(first_last) == 1:
-                contributions_extended["first_name"].iloc[index] = []
-                contributions_extended["last_name"].iloc[index] = first_last[0]
-            # elif len(first_last) == 2:
+                contributions_extended.loc[index, "first_name"] = ""
+                contributions_extended.loc[index, "last_name"] = first_last[0]
             elif len(first_last) >= 2:
-                contributions_extended["first_name"].iloc[index] = first_last[:-1]
-                contributions_extended["last_name"].iloc[index] = first_last[-1]
+                contributions_extended.loc[index, "first_name"] = " ".join(
+                    first_last[:-1]
+                )  # Join multiple first names
+                contributions_extended.loc[index, "last_name"] = first_last[-1]
             else:
-                contributions_extended["first_name"].iloc[index] = []
-                contributions_extended["last_name"].iloc[index] = ""
+                contributions_extended.loc[index, "first_name"] = ""
+                contributions_extended.loc[index, "last_name"] = ""
 
         # look for parties in the faction column and replace them with a
         # standardized faction name
@@ -183,7 +186,9 @@ for folder_path in sorted(CONTRIBUTIONS_EXTENDED_INPUT.iterdir()):
                     contributions_extended.at[index, "faction"] = faction_abbrev
                     try:
                         contributions_extended.at[index, "faction_id"] = int(
-                            factions.loc[factions["abbreviation"] == faction_abbrev, "id"].iloc[0]
+                            factions.loc[
+                                factions["abbreviation"] == faction_abbrev, "id"
+                            ].iloc[0]
                         )
                     except IndexError:
                         contributions_extended.at[index, "faction_id"] = -1

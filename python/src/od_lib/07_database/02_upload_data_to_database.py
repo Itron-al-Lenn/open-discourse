@@ -12,12 +12,19 @@ CONTRIBUTIONS_EXTENDED = path_definitions.DATA_FINAL / "contributions_extended.p
 SPOKEN_CONTENT = path_definitions.DATA_FINAL / "speech_content.pkl"
 FACTIONS = path_definitions.DATA_FINAL / "factions.pkl"
 PEOPLE = path_definitions.DATA_FINAL / "politicians.csv"
-CONTRIBUTIONS_SIMPLIFIED = path_definitions.CONTRIBUTIONS_SIMPLIFIED \
+CONTRIBUTIONS_SIMPLIFIED = (
+    path_definitions.CONTRIBUTIONS_SIMPLIFIED / "contributions_simplified.pkl"
+)
+CONTRIBUTIONS_SIMPLIFIED_WP19 = (
+    path_definitions.CONTRIBUTIONS_SIMPLIFIED
+    / "electoral_term_19"
     / "contributions_simplified.pkl"
-CONTRIBUTIONS_SIMPLIFIED_WP19 = path_definitions.CONTRIBUTIONS_SIMPLIFIED \
-    / "electoral_term_19" / "contributions_simplified.pkl"
-CONTRIBUTIONS_SIMPLIFIED_WP20 = path_definitions.CONTRIBUTIONS_SIMPLIFIED \
-    / "electoral_term_20" / "contributions_simplified.pkl"
+)
+CONTRIBUTIONS_SIMPLIFIED_WP20 = (
+    path_definitions.CONTRIBUTIONS_SIMPLIFIED
+    / "electoral_term_20"
+    / "contributions_simplified.pkl"
+)
 ELECTORAL_TERMS = path_definitions.ELECTORAL_TERMS / "electoral_terms.csv"
 
 # Load data
@@ -122,7 +129,10 @@ factions = [
     ["BP", "Bayernpartei"],
     ["BSW", "Bündnis Sahra Wagenknecht"],
     ["Grüne", "Bündnis 90/Die Grünen"],
-    ["CDU/CSU", "Christlich Demokratische Union Deutschlands/Christlich-Soziale Union in Bayern"],
+    [
+        "CDU/CSU",
+        "Christlich Demokratische Union Deutschlands/Christlich-Soziale Union in Bayern",
+    ],
     ["DA", "Demokratische Arbeitsgemeinschaft"],
     ["DIE LINKE.", "DIE LINKE."],
     ["DP", "Deutsche Partei"],
@@ -150,7 +160,7 @@ factions = [
 
 # convert to dataframe and add id-field
 factions = pd.DataFrame(
-    [[idx-1, *entry] for idx, entry in enumerate(factions)],
+    [[idx - 1, *entry] for idx, entry in enumerate(factions)],
     columns=["id", "abbreviation", "full_name"],
 )
 factions["id"] = factions["id"].astype(int)
@@ -167,7 +177,9 @@ speeches = pd.read_pickle(SPOKEN_CONTENT)
 speeches["date"] = speeches["date"].apply(convert_date_speeches)
 
 speeches = speeches.where((pd.notnull(speeches)), None)
-speeches["position_long"].replace([r"^\s*$"], [None], regex=True, inplace=True)
+speeches["position_long"] = speeches["position_long"].replace(
+    [r"^\s*$"], [None], regex=True
+)
 speeches["politician_id"] = speeches.apply(check_politicians, axis=1)
 
 speeches.to_sql(
@@ -175,9 +187,32 @@ speeches.to_sql(
 )
 print("Done.")
 
+# Get valid speech IDs for filtering contributions
+valid_speech_ids = speeches["id"].unique()
+print(f"Total valid speech IDs: {len(valid_speech_ids)}")
+
 print("Upload contributions_extended...", end="", flush=True)
 
 contributions_extended = pd.read_pickle(CONTRIBUTIONS_EXTENDED)
+
+# Filter out contributions with invalid speech_ids
+original_count = len(contributions_extended)
+missing_speeches = contributions_extended[
+    ~contributions_extended["speech_id"].isin(valid_speech_ids)
+]["speech_id"].unique()
+
+if len(missing_speeches) > 0:
+    print(
+        f"\nWarning: Found {len(missing_speeches)} missing speech IDs in contributions_extended"
+    )
+    print(f"Example missing IDs: {missing_speeches[:10]}")
+    contributions_extended = contributions_extended[
+        contributions_extended["speech_id"].isin(valid_speech_ids)
+    ]
+    filtered_count = len(contributions_extended)
+    print(
+        f"Filtered out {original_count - filtered_count} contributions ({original_count} -> {filtered_count})"
+    )
 
 contributions_extended = contributions_extended.where(
     (pd.notnull(contributions_extended)), None
@@ -211,6 +246,26 @@ contributions_simplified = pd.concat(
     ],
     sort=False,
 )
+
+# Filter out contributions with invalid speech_ids if speech_id column exists
+if "speech_id" in contributions_simplified.columns:
+    original_count = len(contributions_simplified)
+    missing_speeches_simplified = contributions_simplified[
+        ~contributions_simplified["speech_id"].isin(valid_speech_ids)
+    ]["speech_id"].unique()
+
+    if len(missing_speeches_simplified) > 0:
+        print(
+            f"\nWarning: Found {len(missing_speeches_simplified)} missing speech IDs in contributions_simplified"
+        )
+        print(f"Example missing IDs: {missing_speeches_simplified[:10]}")
+        contributions_simplified = contributions_simplified[
+            contributions_simplified["speech_id"].isin(valid_speech_ids)
+        ]
+        filtered_count = len(contributions_simplified)
+        print(
+            f"Filtered out {original_count - filtered_count} contributions ({original_count} -> {filtered_count})"
+        )
 
 contributions_simplified = contributions_simplified.where(
     (pd.notnull(contributions_simplified)), None

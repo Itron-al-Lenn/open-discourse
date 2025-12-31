@@ -17,8 +17,11 @@ election_periods = [
         "election_period": 20,
         "url": "https://www.bundestag.de/ajax/filterlist/de/services/opendata/866354-866354?offset={}",  # noqa
     },
+    {
+        "election_period": 21,
+        "url": "https://www.bundestag.de/ajax/filterlist/de/services/opendata/1058442-1058442?offset={}",  # noqa
+    },
 ]
-
 
 
 for election_period in election_periods:
@@ -50,7 +53,7 @@ for election_period in election_periods:
         xml_links,
         f"Download XML-files for term {election_period['election_period']}...",
     ):
-        url = "https://www.bundestag.de" + link.get("href")
+        url = link.get("href")
         page = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
         session = regex.search(r"\d{5}(?=\.xml)", url).group(0)
 

@@ -1,9 +1,8 @@
 #!/bin/bash
 
 python_exe=python
-if ! command -v $python_exe &> /dev/null
-then
-    python_exe=python3
+if ! command -v $python_exe &>/dev/null; then
+  python_exe=python3
 fi
 $python_exe -m venv .venv
 . .venv/bin/activate

@@ -24,8 +24,9 @@ services:
       - ./proxy/yarn.lock:/srv/yarn.lock
       - ./proxy/src/:/srv/src/
     environment:
-      - CACHE_EXPIRATION=1000
+      - CACHE_EXPIRATION=100000
       - POSTGRES_DB_HOST=database
+      - QUERY_LIMIT=50000
     depends_on:
       database:
         condition: service_started

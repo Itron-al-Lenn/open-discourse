@@ -9,8 +9,12 @@ import sys
 # input directory
 RAW_XML = path_definitions.RAW_XML
 SPEECH_CONTENT_INPUT = path_definitions.SPEECH_CONTENT_STAGE_04
-SPEECH_CONTENT_INPUT_2 = path_definitions.ELECTORAL_TERM_19_20_STAGE_03 / "electoral_term_19"
-SPEECH_CONTENT_INPUT_3 = path_definitions.ELECTORAL_TERM_19_20_STAGE_03 / "electoral_term_20"
+SPEECH_CONTENT_INPUT_2 = (
+    path_definitions.ELECTORAL_TERM_19_20_STAGE_03 / "electoral_term_19"
+)
+SPEECH_CONTENT_INPUT_3 = (
+    path_definitions.ELECTORAL_TERM_19_20_STAGE_03 / "electoral_term_20"
+)
 CONTRIBUTIONS_EXTENDED_INPUT = path_definitions.CONTRIBUTIONS_EXTENDED_STAGE_03
 
 # output directory
@@ -21,6 +25,7 @@ SPEECH_CONTENT_OUTPUT.mkdir(parents=True, exist_ok=True)
 CONTRIBUTIONS_EXTENDED_OUTPUT.mkdir(parents=True, exist_ok=True)
 
 # spoken content
+print("Concat Spoken Content...")
 
 # Placeholder for concating speeches DF of all sessions.
 speech_content_01_18 = []
@@ -87,9 +92,7 @@ for folder_path in sorted(RAW_XML.iterdir()):
         # meta_data["date"].append(tree.find("DATUM").text)
         # document_number = tree.find("NR").text
         date = time.mktime(
-            datetime.datetime.strptime(
-                tree.find("DATUM").text, "%d.%m.%Y"
-            ).timetuple()
+            datetime.datetime.strptime(tree.find("DATUM").text, "%d.%m.%Y").timetuple()
         )
         document_number = xml_plenar_file_path.stem
         document_number = int(document_number)
@@ -196,9 +199,11 @@ speech_content = pd.concat([speech_content_01_18, speech_content_19, speech_cont
 # save data.
 
 speech_content.to_pickle(SPEECH_CONTENT_OUTPUT / "speech_content.pkl")
+print("Done\n")
 
 # Placeholder for concating contributions_extended DF of all sessions.
 contributions_extended = []
+print("Concat Spoken Content...")
 
 # Walk over all legislature periods. ___________________________________________
 for folder_path in sorted(CONTRIBUTIONS_EXTENDED_INPUT.iterdir()):
@@ -234,12 +239,10 @@ contributions_extended = contributions_extended.rename(
     columns={"id": "speech_id", "politician_id": "politician_id"}
 )
 
-contributions_extended.insert(
-    0, "id", list(range(len(contributions_extended)))
-)
+contributions_extended.insert(0, "id", list(range(len(contributions_extended))))
 
-contributions_extended["first_name"] = (
-    contributions_extended["first_name"].apply(" ".join)
+contributions_extended["first_name"] = contributions_extended["first_name"].apply(
+    " ".join
 )
 
 contributions_extended = contributions_extended.astype(
@@ -259,3 +262,5 @@ contributions_extended = contributions_extended.astype(
 contributions_extended.to_pickle(
     CONTRIBUTIONS_EXTENDED_OUTPUT / "contributions_extended.pkl"
 )
+
+print("Done\n")

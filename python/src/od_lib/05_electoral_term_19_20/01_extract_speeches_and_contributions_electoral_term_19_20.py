@@ -161,9 +161,6 @@ for folder_path in sorted(ELECTORAL_TERM_19_20_INPUT.iterdir()):
         continue
     term_number = int(term_number.group(0))
 
-    if term_number != 21:
-        continue
-
     contributions_extended_output = CONTRIBUTIONS_EXTENDED / folder_path.stem
     term_spoken_content = (
         ELECTORAL_TERM_19_20_OUTPUT / folder_path.stem / "speech_content"

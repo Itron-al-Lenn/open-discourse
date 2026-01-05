@@ -15,6 +15,9 @@ SPEECH_CONTENT_INPUT_2 = (
 SPEECH_CONTENT_INPUT_3 = (
     path_definitions.ELECTORAL_TERM_19_20_STAGE_03 / "electoral_term_20"
 )
+SPEECH_CONTENT_INPUT_4 = (
+    path_definitions.ELECTORAL_TERM_19_20_STAGE_03 / "electoral_term_21"
+)
 CONTRIBUTIONS_EXTENDED_INPUT = path_definitions.CONTRIBUTIONS_EXTENDED_STAGE_03
 
 # output directory
@@ -127,6 +130,9 @@ speech_content_19 = pd.read_pickle(
 speech_content_20 = pd.read_pickle(
     SPEECH_CONTENT_INPUT_3 / "speech_content" / "speech_content.pkl"
 )
+speech_content_21 = pd.read_pickle(
+    SPEECH_CONTENT_INPUT_4 / "speech_content" / "speech_content.pkl"
+)
 
 speech_content_19 = speech_content_19.loc[
     :,
@@ -158,10 +164,26 @@ speech_content_20 = speech_content_20.loc[
         "date",
     ],
 ]
+speech_content_21 = speech_content_21.loc[
+    :,
+    [
+        "id",
+        "session",
+        "first_name",
+        "last_name",
+        "faction_id",
+        "position_short",
+        "position_long",
+        "politician_id",
+        "speech_content",
+        "date",
+    ],
+]
 
 
 speech_content_19.insert(1, "electoral_term", -1)
 speech_content_20.insert(1, "electoral_term", -1)
+speech_content_21.insert(1, "electoral_term", -1)
 
 speech_content_19["electoral_term"] = speech_content_19["session"].apply(
     lambda x: str(x)[:2]
@@ -169,8 +191,12 @@ speech_content_19["electoral_term"] = speech_content_19["session"].apply(
 speech_content_20["electoral_term"] = speech_content_20["session"].apply(
     lambda x: str(x)[:2]
 )
+speech_content_21["electoral_term"] = speech_content_21["session"].apply(
+    lambda x: str(x)[:2]
+)
 speech_content_19["session"] = speech_content_19["session"].apply(lambda x: str(x)[-3:])
 speech_content_20["session"] = speech_content_20["session"].apply(lambda x: str(x)[-3:])
+speech_content_21["session"] = speech_content_21["session"].apply(lambda x: str(x)[-3:])
 
 speech_content_19["document_url"] = speech_content_19.apply(
     lambda row: "https://dip21.bundestag.de/dip21/btp/{0}/{0}{1}.pdf".format(
@@ -184,6 +210,12 @@ speech_content_20["document_url"] = speech_content_20.apply(
     ),
     axis=1,
 )
+speech_content_21["document_url"] = speech_content_21.apply(
+    lambda row: "https://dip21.bundestag.de/dip21/btp/{0}/{0}{1}.pdf".format(
+        row["electoral_term"], row["session"]
+    ),
+    axis=1,
+)
 
 speech_content_19["electoral_term"] = speech_content_19["electoral_term"].astype(
     "int32"
@@ -191,10 +223,16 @@ speech_content_19["electoral_term"] = speech_content_19["electoral_term"].astype
 speech_content_20["electoral_term"] = speech_content_20["electoral_term"].astype(
     "int32"
 )
+speech_content_21["electoral_term"] = speech_content_21["electoral_term"].astype(
+    "int32"
+)
 speech_content_19["session"] = speech_content_19["session"].astype("int32")
 speech_content_20["session"] = speech_content_20["session"].astype("int32")
+speech_content_21["session"] = speech_content_21["session"].astype("int32")
 
-speech_content = pd.concat([speech_content_01_18, speech_content_19, speech_content_20])
+speech_content = pd.concat(
+    [speech_content_01_18, speech_content_19, speech_content_20, speech_content_21]
+)
 
 # save data.
 

@@ -25,6 +25,11 @@ CONTRIBUTIONS_SIMPLIFIED_WP20 = (
     / "electoral_term_20"
     / "contributions_simplified.pkl"
 )
+CONTRIBUTIONS_SIMPLIFIED_WP21 = (
+    path_definitions.CONTRIBUTIONS_SIMPLIFIED
+    / "electoral_term_21"
+    / "contributions_simplified.pkl"
+)
 ELECTORAL_TERMS = path_definitions.ELECTORAL_TERMS / "electoral_terms.csv"
 
 # Load data
@@ -237,12 +242,16 @@ contributions_simplified_electoral_term_19 = pd.read_pickle(
 contributions_simplified_electoral_term_20 = pd.read_pickle(
     CONTRIBUTIONS_SIMPLIFIED_WP20
 )
+contributions_simplified_electoral_term_21 = pd.read_pickle(
+    CONTRIBUTIONS_SIMPLIFIED_WP21
+)
 
 contributions_simplified = pd.concat(
     [
         contributions_simplified,
         contributions_simplified_electoral_term_19,
         contributions_simplified_electoral_term_20,
+        contributions_simplified_electoral_term_21,
     ],
     sort=False,
 )
